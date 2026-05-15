@@ -1,4 +1,4 @@
-# Lobster
+# 🦞 Lobster
 
 An OpenClaw-native workflow shell: typed (JSON-first) pipelines, jobs, and approval gates.
 
