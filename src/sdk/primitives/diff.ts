@@ -25,11 +25,11 @@ import { ensureDirectory, isJsonSyntaxError, writeFileAtomic } from "../../state
  * @returns {string}
  */
 function getStateDir(ctx) {
-  return (
-    ctx?.stateDir ||
-    (ctx?.env?.LOBSTER_STATE_DIR && String(ctx.env.LOBSTER_STATE_DIR).trim()) ||
-    path.join(os.homedir(), ".lobster", "state")
-  );
+	return (
+		ctx?.stateDir ||
+		(ctx?.env?.LOBSTER_STATE_DIR && String(ctx.env.LOBSTER_STATE_DIR).trim()) ||
+		path.join(os.homedir(), ".lobster", "state")
+	);
 }
 
 /**
@@ -39,13 +39,13 @@ function getStateDir(ctx) {
  * @returns {string}
  */
 function keyToPath(stateDir, key) {
-  const safe = String(key)
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  if (!safe) throw new Error("state key is empty/invalid");
-  return path.join(stateDir, `${safe}.json`);
+	const safe = String(key)
+		.toLowerCase()
+		.replace(/[^a-z0-9._-]+/g, "_")
+		.replace(/_+/g, "_")
+		.replace(/^_+|_+$/g, "");
+	if (!safe) throw new Error("state key is empty/invalid");
+	return path.join(stateDir, `${safe}.json`);
 }
 
 /**
@@ -54,16 +54,16 @@ function keyToPath(stateDir, key) {
  * @returns {string}
  */
 function stableStringify(value) {
-  return JSON.stringify(value, (_k, v) => {
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      return Object.fromEntries(
-        Object.keys(v)
-          .sort()
-          .map((k) => [k, v[k]]),
-      );
-    }
-    return v;
-  });
+	return JSON.stringify(value, (_k, v) => {
+		if (v && typeof v === "object" && !Array.isArray(v)) {
+			return Object.fromEntries(
+				Object.keys(v)
+					.sort()
+					.map((k) => [k, v[k]]),
+			);
+		}
+		return v;
+	});
 }
 
 /**
@@ -78,69 +78,69 @@ function stableStringify(value) {
  * @returns {Object} Stage object with run method
  */
 export function diffLast(key, options: any = {}) {
-  if (!key) throw new Error("diffLast requires a key");
+	if (!key) throw new Error("diffLast requires a key");
 
-  const changesOnly = options.changesOnly === true;
+	const changesOnly = options.changesOnly === true;
 
-  return {
-    type: "diff.last",
-    key,
+	return {
+		type: "diff.last",
+		key,
 
-    async run({ input, ctx }) {
-      // Collect all input items
-      const items = [];
-      for await (const item of input) {
-        items.push(item);
-      }
+		async run({ input, ctx }) {
+			// Collect all input items
+			const items = [];
+			for await (const item of input) {
+				items.push(item);
+			}
 
-      const value = items.length === 1 ? items[0] : items;
+			const value = items.length === 1 ? items[0] : items;
 
-      const stateDir = getStateDir(ctx);
-      const filePath = keyToPath(stateDir, key);
+			const stateDir = getStateDir(ctx);
+			const filePath = keyToPath(stateDir, key);
 
-      // Read previous value
-      let before = null;
-      try {
-        const text = await fsp.readFile(filePath, "utf8");
-        before = JSON.parse(text);
-      } catch (err) {
-        if (err?.code !== "ENOENT" && !isJsonSyntaxError(err)) {
-          throw err;
-        }
-      }
+			// Read previous value
+			let before = null;
+			try {
+				const text = await fsp.readFile(filePath, "utf8");
+				before = JSON.parse(text);
+			} catch (err) {
+				if (err?.code !== "ENOENT" && !isJsonSyntaxError(err)) {
+					throw err;
+				}
+			}
 
-      // Compare
-      const changed = stableStringify(before) !== stableStringify(value);
+			// Compare
+			const changed = stableStringify(before) !== stableStringify(value);
 
-      // Store new value
-      await ensureDirectory(stateDir);
-      await writeFileAtomic(filePath, JSON.stringify(value, null, 2) + "\n");
+			// Store new value
+			await ensureDirectory(stateDir);
+			await writeFileAtomic(filePath, JSON.stringify(value, null, 2) + "\n");
 
-      // Build result
-      const result = {
-        kind: "diff.last",
-        key,
-        changed,
-        before,
-        after: value,
-      };
+			// Build result
+			const result = {
+				kind: "diff.last",
+				key,
+				changed,
+				before,
+				after: value,
+			};
 
-      // If changesOnly and no change, output suppressed marker
-      if (changesOnly && !changed) {
-        return {
-          output: (async function* () {
-            yield { kind: "diff.last", key, changed: false, suppressed: true };
-          })(),
-        };
-      }
+			// If changesOnly and no change, output suppressed marker
+			if (changesOnly && !changed) {
+				return {
+					output: (async function* () {
+						yield { kind: "diff.last", key, changed: false, suppressed: true };
+					})(),
+				};
+			}
 
-      return {
-        output: (async function* () {
-          yield result;
-        })(),
-      };
-    },
-  };
+			return {
+				output: (async function* () {
+					yield result;
+				})(),
+			};
+		},
+	};
 }
 
 /**
@@ -151,26 +151,26 @@ export function diffLast(key, options: any = {}) {
  * @returns {Promise<{before: any, after: any, changed: boolean}>}
  */
 export async function diffAndStoreValue(key, value, ctx = {}) {
-  const stateDir = getStateDir(ctx);
-  const filePath = keyToPath(stateDir, key);
+	const stateDir = getStateDir(ctx);
+	const filePath = keyToPath(stateDir, key);
 
-  // Read previous value
-  let before = null;
-  try {
-    const text = await fsp.readFile(filePath, "utf8");
-    before = JSON.parse(text);
-  } catch (err) {
-    if (err?.code !== "ENOENT" && !isJsonSyntaxError(err)) {
-      throw err;
-    }
-  }
+	// Read previous value
+	let before = null;
+	try {
+		const text = await fsp.readFile(filePath, "utf8");
+		before = JSON.parse(text);
+	} catch (err) {
+		if (err?.code !== "ENOENT" && !isJsonSyntaxError(err)) {
+			throw err;
+		}
+	}
 
-  // Compare
-  const changed = stableStringify(before) !== stableStringify(value);
+	// Compare
+	const changed = stableStringify(before) !== stableStringify(value);
 
-  // Store new value
-  await ensureDirectory(stateDir);
-  await writeFileAtomic(filePath, JSON.stringify(value, null, 2) + "\n");
+	// Store new value
+	await ensureDirectory(stateDir);
+	await writeFileAtomic(filePath, JSON.stringify(value, null, 2) + "\n");
 
-  return { before, after: value, changed };
+	return { before, after: value, changed };
 }

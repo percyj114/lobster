@@ -19,32 +19,32 @@
  * @returns {Object} Stage object with run method
  */
 export function approve(options: any = {}) {
-  const prompt = options.prompt ?? "Approve?";
-  const preview = options.preview !== false;
+	const prompt = options.prompt ?? "Approve?";
+	const preview = options.preview !== false;
 
-  return {
-    type: "approve",
-    prompt,
+	return {
+		type: "approve",
+		prompt,
 
-    async run({ input, ctx: _ctx }) {
-      // Collect all items
-      const items = [];
-      for await (const item of input) {
-        items.push(item);
-      }
+		async run({ input, ctx: _ctx }) {
+			// Collect all items
+			const items = [];
+			for await (const item of input) {
+				items.push(item);
+			}
 
-      // In SDK mode, always emit approval request and halt
-      return {
-        halt: true,
-        output: (async function* () {
-          yield {
-            type: "approval_request",
-            prompt,
-            items: preview ? items : [],
-            itemCount: items.length,
-          };
-        })(),
-      };
-    },
-  };
+			// In SDK mode, always emit approval request and halt
+			return {
+				halt: true,
+				output: (async function* () {
+					yield {
+						type: "approval_request",
+						prompt,
+						items: preview ? items : [],
+						itemCount: items.length,
+					};
+				})(),
+			};
+		},
+	};
 }

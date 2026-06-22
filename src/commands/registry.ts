@@ -25,46 +25,46 @@ import { gogGmailSendCommand } from "./stdlib/gog_gmail_send.js";
 import { emailTriageCommand } from "./stdlib/email_triage.js";
 
 export function createDefaultRegistry() {
-  const commands = new Map();
+	const commands = new Map();
 
-  for (const cmd of [
-    execCommand,
-    headCommand,
-    jsonCommand,
-    pickCommand,
-    tableCommand,
-    whereCommand,
-    sortCommand,
-    dedupeCommand,
-    templateCommand,
-    mapCommand,
-    groupByCommand,
-    approveCommand,
-    askCommand,
-    openclawInvokeCommand,
-    clawdInvokeCommand,
-    openclawAgentCommand,
-    llmInvokeCommand,
-    llmTaskInvokeCommand,
-    stateGetCommand,
-    stateSetCommand,
-    diffLastCommand,
-    workflowsListCommand,
-    workflowsRunCommand,
-    commandsListCommand,
-    gogGmailSearchCommand,
-    gogGmailSendCommand,
-    emailTriageCommand,
-  ]) {
-    commands.set(cmd.name, cmd);
-  }
+	for (const cmd of [
+		execCommand,
+		headCommand,
+		jsonCommand,
+		pickCommand,
+		tableCommand,
+		whereCommand,
+		sortCommand,
+		dedupeCommand,
+		templateCommand,
+		mapCommand,
+		groupByCommand,
+		approveCommand,
+		askCommand,
+		openclawInvokeCommand,
+		clawdInvokeCommand,
+		openclawAgentCommand,
+		llmInvokeCommand,
+		llmTaskInvokeCommand,
+		stateGetCommand,
+		stateSetCommand,
+		diffLastCommand,
+		workflowsListCommand,
+		workflowsRunCommand,
+		commandsListCommand,
+		gogGmailSearchCommand,
+		gogGmailSendCommand,
+		emailTriageCommand,
+	]) {
+		commands.set(cmd.name, cmd);
+	}
 
-  return {
-    get(name) {
-      return commands.get(name);
-    },
-    list() {
-      return [...commands.keys()].sort();
-    },
-  };
+	return {
+		get(name) {
+			return commands.get(name);
+		},
+		list() {
+			return [...commands.keys()].sort();
+		},
+	};
 }

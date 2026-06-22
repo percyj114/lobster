@@ -1,75 +1,75 @@
 {
-  "name": "@clawdbot/lobster",
-  "version": "2026.6.11",
-  "description": "Workflow runtime for AI agents - deterministic pipelines with approval gates",
-  "keywords": [
-    "ai-agent",
-    "approval",
-    "automation",
-    "lobster",
-    "openclaw",
-    "pipeline",
-    "workflow"
-  ],
-  "homepage": "https://github.com/openclaw/lobster#readme",
-  "bugs": {
-    "url": "https://github.com/openclaw/lobster/issues"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/openclaw/lobster.git"
-  },
-  "bin": {
-    "clawd.invoke": "bin/clawd.invoke.js",
-    "lobster": "bin/lobster.js",
-    "openclaw.invoke": "bin/openclaw.invoke.js"
-  },
-  "files": [
-    "bin",
-    "dist",
-    "README.md",
-    "LICENSE",
-    "VISION.md"
-  ],
-  "type": "module",
-  "main": "./dist/src/sdk/index.js",
-  "exports": {
-    ".": "./dist/src/sdk/index.js",
-    "./sdk": "./dist/src/sdk/index.js",
-    "./core": "./dist/src/core/index.js",
-    "./recipes/github": "./dist/src/recipes/github/index.js"
-  },
-  "scripts": {
-    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
-    "build": "pnpm clean && tsgo -p tsconfig.build.json",
-    "prepack": "pnpm build",
-    "typecheck": "tsgo -p tsconfig.json --noEmit",
-    "format": "oxfmt --write package.json tsconfig.json tsconfig.build.json bin src test",
-    "format:check": "oxfmt --check package.json tsconfig.json tsconfig.build.json bin src test",
-    "lint": "pnpm format:check && oxlint --tsconfig tsconfig.json bin src test",
-    "fmt": "pnpm format",
-    "test": "pnpm clean && tsgo -p tsconfig.json && node -e \"if (!require('fs').existsSync('dist/test')) process.exit(1)\" && node --test dist/test/*.test.js",
-    "check:changed": "pnpm run test",
-    "test:changed": "pnpm run test",
-    "crabbox:hydrate": "crabbox actions hydrate",
-    "crabbox:run": "crabbox run",
-    "crabbox:stop": "crabbox stop",
-    "crabbox:warmup": "crabbox warmup"
-  },
-  "dependencies": {
-    "ajv": "^8.20.0",
-    "yaml": "^2.9.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.9.2",
-    "@typescript/native-preview": "7.0.0-dev.20260609.1",
-    "oxfmt": "^0.54.0",
-    "oxlint": "^1.69.0",
-    "oxlint-tsgolint": "^0.23.0",
-    "typescript": "^6.0.3"
-  },
-  "engines": {
-    "node": ">=22"
-  }
+	"name": "@clawdbot/lobster",
+	"version": "2026.6.11",
+	"description": "Workflow runtime for AI agents - deterministic pipelines with approval gates",
+	"keywords": [
+		"ai-agent",
+		"approval",
+		"automation",
+		"lobster",
+		"openclaw",
+		"pipeline",
+		"workflow"
+	],
+	"homepage": "https://github.com/openclaw/lobster#readme",
+	"bugs": {
+		"url": "https://github.com/openclaw/lobster/issues"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/openclaw/lobster.git"
+	},
+	"bin": {
+		"clawd.invoke": "bin/clawd.invoke.js",
+		"lobster": "bin/lobster.js",
+		"openclaw.invoke": "bin/openclaw.invoke.js"
+	},
+	"files": [
+		"bin",
+		"dist",
+		"README.md",
+		"LICENSE",
+		"VISION.md"
+	],
+	"type": "module",
+	"main": "./dist/src/sdk/index.js",
+	"exports": {
+		".": "./dist/src/sdk/index.js",
+		"./sdk": "./dist/src/sdk/index.js",
+		"./core": "./dist/src/core/index.js",
+		"./recipes/github": "./dist/src/recipes/github/index.js"
+	},
+	"scripts": {
+		"clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+		"build": "pnpm clean && tsgo -p tsconfig.build.json",
+		"prepack": "pnpm build",
+		"typecheck": "tsgo -p tsconfig.json --noEmit",
+		"format": "oxfmt --write package.json tsconfig.json tsconfig.build.json bin src test",
+		"format:check": "oxfmt --check package.json tsconfig.json tsconfig.build.json bin src test",
+		"lint": "pnpm format:check && oxlint --tsconfig tsconfig.json bin src test",
+		"fmt": "pnpm format",
+		"test": "pnpm clean && tsgo -p tsconfig.json && node -e \"if (!require('fs').existsSync('dist/test')) process.exit(1)\" && node --test dist/test/*.test.js",
+		"check:changed": "pnpm run test",
+		"test:changed": "pnpm run test",
+		"crabbox:hydrate": "crabbox actions hydrate",
+		"crabbox:run": "crabbox run",
+		"crabbox:stop": "crabbox stop",
+		"crabbox:warmup": "crabbox warmup"
+	},
+	"dependencies": {
+		"ajv": "^8.20.0",
+		"yaml": "^2.9.0"
+	},
+	"devDependencies": {
+		"@types/node": "^25.9.2",
+		"@typescript/native-preview": "7.0.0-dev.20260609.1",
+		"oxfmt": "^0.54.0",
+		"oxlint": "^1.69.0",
+		"oxlint-tsgolint": "^0.23.0",
+		"typescript": "^6.0.3"
+	},
+	"engines": {
+		"node": ">=22"
+	}
 }

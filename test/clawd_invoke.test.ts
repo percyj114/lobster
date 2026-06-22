@@ -4,155 +4,155 @@ import http from "node:http";
 import { createDefaultRegistry } from "../src/commands/registry.js";
 
 function streamOf(items) {
-  return (async function* () {
-    for (const item of items) yield item;
-  })();
+	return (async function* () {
+		for (const item of items) yield item;
+	})();
 }
 
 test("openclaw.invoke posts to /tools/invoke and returns JSON", async () => {
-  const server = http.createServer((req, res) => {
-    if (req.method !== "POST" || req.url !== "/tools/invoke") {
-      res.writeHead(404);
-      res.end("not found");
-      return;
-    }
+	const server = http.createServer((req, res) => {
+		if (req.method !== "POST" || req.url !== "/tools/invoke") {
+			res.writeHead(404);
+			res.end("not found");
+			return;
+		}
 
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (d) => (body += d));
-    req.on("end", () => {
-      const parsed = JSON.parse(body);
-      assert.equal(parsed.tool, "demo");
-      assert.equal(parsed.action, "ping");
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ ok: true, result: [{ ok: true, echo: parsed.args }] }));
-    });
-  });
+		let body = "";
+		req.setEncoding("utf8");
+		req.on("data", (d) => (body += d));
+		req.on("end", () => {
+			const parsed = JSON.parse(body);
+			assert.equal(parsed.tool, "demo");
+			assert.equal(parsed.action, "ping");
+			res.writeHead(200, { "content-type": "application/json" });
+			res.end(JSON.stringify({ ok: true, result: [{ ok: true, echo: parsed.args }] }));
+		});
+	});
 
-  await new Promise<void>((resolve) => server.listen(0, () => resolve()));
-  const addr = server.address();
-  const port = typeof addr === "string" || addr == null ? 0 : addr.port;
+	await new Promise<void>((resolve) => server.listen(0, () => resolve()));
+	const addr = server.address();
+	const port = typeof addr === "string" || addr == null ? 0 : addr.port;
 
-  try {
-    const registry = createDefaultRegistry();
-    const cmd = registry.get("openclaw.invoke");
+	try {
+		const registry = createDefaultRegistry();
+		const cmd = registry.get("openclaw.invoke");
 
-    const result = await cmd.run({
-      input: streamOf([]),
-      args: {
-        _: [],
-        url: `http://127.0.0.1:${port}`,
-        tool: "demo",
-        action: "ping",
-        "args-json": '{"hello":"world"}',
-      },
-      ctx: {
-        stdin: process.stdin,
-        stdout: process.stdout,
-        stderr: process.stderr,
-        env: process.env,
-        registry,
-        mode: "tool",
-        render: { json() {}, lines() {} },
-      },
-    });
+		const result = await cmd.run({
+			input: streamOf([]),
+			args: {
+				_: [],
+				url: `http://127.0.0.1:${port}`,
+				tool: "demo",
+				action: "ping",
+				"args-json": '{"hello":"world"}',
+			},
+			ctx: {
+				stdin: process.stdin,
+				stdout: process.stdout,
+				stderr: process.stderr,
+				env: process.env,
+				registry,
+				mode: "tool",
+				render: { json() {}, lines() {} },
+			},
+		});
 
-    const items = [];
-    for await (const it of result.output) items.push(it);
-    assert.deepEqual(items, [{ ok: true, echo: { hello: "world" } }]);
-  } finally {
-    server.close();
-  }
+		const items = [];
+		for await (const it of result.output) items.push(it);
+		assert.deepEqual(items, [{ ok: true, echo: { hello: "world" } }]);
+	} finally {
+		server.close();
+	}
 });
 
 test("openclaw.invoke --each maps input items into tool args", async () => {
-  const seen: Array<{ call: number; args: unknown }> = [];
-  const server = http.createServer((req, res) => {
-    if (req.method !== "POST" || req.url !== "/tools/invoke") {
-      res.writeHead(404);
-      res.end("not found");
-      return;
-    }
+	const seen: Array<{ call: number; args: unknown }> = [];
+	const server = http.createServer((req, res) => {
+		if (req.method !== "POST" || req.url !== "/tools/invoke") {
+			res.writeHead(404);
+			res.end("not found");
+			return;
+		}
 
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (d) => (body += d));
-    req.on("end", () => {
-      const parsed = JSON.parse(body);
-      seen.push({ call: seen.length + 1, args: parsed.args });
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ ok: true, result: [{ ok: true, call: seen.length }] }));
-    });
-  });
+		let body = "";
+		req.setEncoding("utf8");
+		req.on("data", (d) => (body += d));
+		req.on("end", () => {
+			const parsed = JSON.parse(body);
+			seen.push({ call: seen.length + 1, args: parsed.args });
+			res.writeHead(200, { "content-type": "application/json" });
+			res.end(JSON.stringify({ ok: true, result: [{ ok: true, call: seen.length }] }));
+		});
+	});
 
-  await new Promise<void>((resolve) => server.listen(0, () => resolve()));
-  const addr = server.address();
-  const port = typeof addr === "string" || addr == null ? 0 : addr.port;
+	await new Promise<void>((resolve) => server.listen(0, () => resolve()));
+	const addr = server.address();
+	const port = typeof addr === "string" || addr == null ? 0 : addr.port;
 
-  try {
-    const registry = createDefaultRegistry();
-    const cmd = registry.get("openclaw.invoke");
+	try {
+		const registry = createDefaultRegistry();
+		const cmd = registry.get("openclaw.invoke");
 
-    const result = await cmd.run({
-      input: streamOf(["a", "b"]),
-      args: {
-        _: [],
-        url: `http://127.0.0.1:${port}`,
-        tool: "demo",
-        action: "ping",
-        each: true,
-        "item-key": "message",
-        "args-json": '{"channel":"test"}',
-      },
-      ctx: {
-        stdin: process.stdin,
-        stdout: process.stdout,
-        stderr: process.stderr,
-        env: process.env,
-        registry,
-        mode: "tool",
-        render: { json() {}, lines() {} },
-      },
-    });
+		const result = await cmd.run({
+			input: streamOf(["a", "b"]),
+			args: {
+				_: [],
+				url: `http://127.0.0.1:${port}`,
+				tool: "demo",
+				action: "ping",
+				each: true,
+				"item-key": "message",
+				"args-json": '{"channel":"test"}',
+			},
+			ctx: {
+				stdin: process.stdin,
+				stdout: process.stdout,
+				stderr: process.stderr,
+				env: process.env,
+				registry,
+				mode: "tool",
+				render: { json() {}, lines() {} },
+			},
+		});
 
-    const items = [];
-    for await (const it of result.output) items.push(it);
-    assert.deepEqual(items, [
-      { ok: true, call: 1 },
-      { ok: true, call: 2 },
-    ]);
-    assert.deepEqual(seen, [
-      { call: 1, args: { channel: "test", message: "a" } },
-      { call: 2, args: { channel: "test", message: "b" } },
-    ]);
-  } finally {
-    server.close();
-  }
+		const items = [];
+		for await (const it of result.output) items.push(it);
+		assert.deepEqual(items, [
+			{ ok: true, call: 1 },
+			{ ok: true, call: 2 },
+		]);
+		assert.deepEqual(seen, [
+			{ call: 1, args: { channel: "test", message: "a" } },
+			{ call: 2, args: { channel: "test", message: "b" } },
+		]);
+	} finally {
+		server.close();
+	}
 });
 
 test("openclaw.invoke refuses env tokens for non-local URLs", async () => {
-  const registry = createDefaultRegistry();
-  const cmd = registry.get("openclaw.invoke");
+	const registry = createDefaultRegistry();
+	const cmd = registry.get("openclaw.invoke");
 
-  await assert.rejects(
-    cmd.run({
-      input: streamOf([]),
-      args: {
-        _: [],
-        url: "https://example.com",
-        tool: "demo",
-        action: "ping",
-      },
-      ctx: {
-        stdin: process.stdin,
-        stdout: process.stdout,
-        stderr: process.stderr,
-        env: { ...process.env, OPENCLAW_TOKEN: "secret" },
-        registry,
-        mode: "tool",
-        render: { json() {}, lines() {} },
-      },
-    }),
-    /refuses to send OPENCLAW_TOKEN\/CLAWD_TOKEN to non-local --url/,
-  );
+	await assert.rejects(
+		cmd.run({
+			input: streamOf([]),
+			args: {
+				_: [],
+				url: "https://example.com",
+				tool: "demo",
+				action: "ping",
+			},
+			ctx: {
+				stdin: process.stdin,
+				stdout: process.stdout,
+				stderr: process.stderr,
+				env: { ...process.env, OPENCLAW_TOKEN: "secret" },
+				registry,
+				mode: "tool",
+				render: { json() {}, lines() {} },
+			},
+		}),
+		/refuses to send OPENCLAW_TOKEN\/CLAWD_TOKEN to non-local --url/,
+	);
 });

@@ -10,15 +10,15 @@ const argv = process.argv.slice(2);
 
 // Minimal mock for `gog gmail search` and `gog gmail send`.
 if (argv[0] === "gmail" && argv[1] === "search") {
-  const data = readFileSync(join(__dirname, "gog_gmail_search.json"), "utf8");
-  process.stdout.write(data);
-  process.exit(0);
+	const data = readFileSync(join(__dirname, "gog_gmail_search.json"), "utf8");
+	process.stdout.write(data);
+	process.exit(0);
 }
 
 if (argv[0] === "gmail" && argv[1] === "send") {
-  // Echo a json success object.
-  process.stdout.write(JSON.stringify({ ok: true }));
-  process.exit(0);
+	// Echo a json success object.
+	process.stdout.write(JSON.stringify({ ok: true }));
+	process.exit(0);
 }
 
 process.stderr.write("mock-gog: unsupported args: " + argv.join(" ") + "\n");
