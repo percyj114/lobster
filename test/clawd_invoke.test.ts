@@ -129,3 +129,30 @@ test("openclaw.invoke --each maps input items into tool args", async () => {
     server.close();
   }
 });
+
+test("openclaw.invoke refuses env tokens for non-local URLs", async () => {
+  const registry = createDefaultRegistry();
+  const cmd = registry.get("openclaw.invoke");
+
+  await assert.rejects(
+    cmd.run({
+      input: streamOf([]),
+      args: {
+        _: [],
+        url: "https://example.com",
+        tool: "demo",
+        action: "ping",
+      },
+      ctx: {
+        stdin: process.stdin,
+        stdout: process.stdout,
+        stderr: process.stderr,
+        env: { ...process.env, OPENCLAW_TOKEN: "secret" },
+        registry,
+        mode: "tool",
+        render: { json() {}, lines() {} },
+      },
+    }),
+    /refuses to send OPENCLAW_TOKEN\/CLAWD_TOKEN to non-local --url/,
+  );
+});

@@ -517,6 +517,33 @@ jobs:
             exit 1
           fi
 
+          if ! VERSION_A="${latest_version}" VERSION_B="${RELEASE_VERSION}" node <<'NODE'
+          function parseVersion(value) {
+            const match = /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9]+))?$/.exec(value);
+            if (!match) throw new Error(`Invalid version: ${value}`);
+            return {
+              major: Number(match[1]),
+              minor: Number(match[2]),
+              patch: Number(match[3]),
+              prerelease: match[4] === undefined ? null : Number(match[4]),
+            };
+          }
+          const latest = parseVersion(process.env.VERSION_A);
+          const release = parseVersion(process.env.VERSION_B);
+          const fields = ["major", "minor", "patch"];
+          for (const field of fields) {
+            if (latest[field] > release[field]) process.exit(1);
+            if (latest[field] < release[field]) process.exit(0);
+          }
+          if (latest.prerelease === null && release.prerelease !== null) process.exit(1);
+          if (latest.prerelease !== null && release.prerelease === null) process.exit(0);
+          if ((latest.prerelease ?? 0) > (release.prerelease ?? 0)) process.exit(1);
+          NODE
+          then
+            echo "npm latest ${latest_version} is newer than release ${RELEASE_VERSION}; refusing downgrade promotion." >&2
+            exit 1
+          fi
+
           if ! npm view "${PACKAGE_NAME}@${RELEASE_VERSION}" version >/dev/null 2>&1; then
             echo "${PACKAGE_NAME}@${RELEASE_VERSION} is not published on npm." >&2
             exit 1

@@ -58,8 +58,9 @@ function createInvokeCommand(commandName: string) {
       const action = args.action;
       if (!tool || !action) throw new Error(`${commandName} requires --tool and --action`);
 
+      const explicitToken = args.token !== undefined && args.token !== null;
       const token = String(
-        args.token ?? ctx.env.OPENCLAW_TOKEN ?? ctx.env.CLAWD_TOKEN ?? "",
+        explicitToken ? args.token : ctx.env.OPENCLAW_TOKEN ?? ctx.env.CLAWD_TOKEN ?? "",
       ).trim();
 
       let toolArgs: any = {};
@@ -76,6 +77,14 @@ function createInvokeCommand(commandName: string) {
       }
 
       const endpoint = new URL("/tools/invoke", url);
+      if (endpoint.protocol !== "http:" && endpoint.protocol !== "https:") {
+        throw new Error(`${commandName} requires an http(s) --url`);
+      }
+      if (token && !explicitToken && !isLocalOpenClawOrigin(endpoint)) {
+        throw new Error(
+          `${commandName} refuses to send OPENCLAW_TOKEN/CLAWD_TOKEN to non-local --url; pass --token explicitly for remote endpoints`,
+        );
+      }
       const sessionKey = args.sessionKey ?? args["session-key"] ?? null;
       const dryRun = args.dryRun ?? args["dry-run"] ?? null;
 
@@ -144,6 +153,11 @@ function createInvokeCommand(commandName: string) {
 
 async function* asStream(items: any[]) {
   for (const item of items) yield item;
+}
+
+function isLocalOpenClawOrigin(url: URL): boolean {
+  const hostname = url.hostname.toLowerCase();
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
 
 export const openclawInvokeCommand = createInvokeCommand("openclaw.invoke");
